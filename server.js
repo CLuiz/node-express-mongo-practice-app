@@ -4,6 +4,7 @@ const MongoClient = require('mongodb').MongoClient
 const app = express();
 
 app.use(bodyParser.urlencoded({extended: true}));
+app.set('view engine', 'ejs')
 
 var db;
 const mongoURL = 'mongodb://db_user:db_user_password@ds133241.mlab.com:33241/chris_test_db';
@@ -17,8 +18,10 @@ MongoClient.connect(mongoURL, (err, database) => {
 });
 
 app.get('/', (req, res) => {
-    var cursor = db.collection('quotes').find().toArray(function(err, results){
-        console.log(results)
+    db.collection('quotes').find().toArray(function(err, result){
+        if (err) return console.log(err)
+        // renders index.ejs
+        res.render('index.ejs', {quotes: result})
     });
 });
 
