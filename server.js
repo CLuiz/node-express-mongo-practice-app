@@ -4,9 +4,12 @@ const MongoClient = require('mongodb').MongoClient
 const app = express();
 
 app.use(bodyParser.urlencoded({extended: true}));
-app.set('view engine', 'ejs')
+app.set('view engine', 'ejs');
+app.use(express.static('public'));
+app.use(bodyParser.json());
 
 var db;
+
 const mongoURL = 'mongodb://db_user:db_user_password@ds133241.mlab.com:33241/chris_test_db';
 
 MongoClient.connect(mongoURL, (err, database) => {
@@ -33,4 +36,29 @@ app.post('/quotes', (req, res) => {
         res.redirect('/');
     });
     console.log(req.body);
+});
+
+app.put('/quotes', (req, res) => {
+    db.collections('quotes')
+    .findOneAndUpdate({name: 'Yoda'}, {
+        $set: {
+            name: req.body.name,
+            quote: req.body.quote
+        }
+    }, {
+        sort: {_id: -1},
+        upsert: true
+    }, (err, result) => {
+        if (err) return res.send(err);
+        res.send(result);
+    });
+});
+
+app.delete('/quotes', (req, res) => {
+    db.collections('quotes')
+    .findOneAndDelete({name: req.body.name},
+        (err, result) => {
+            if (err) return res.send(500, err);
+            res.send('A Darth Vader Quote was deleted');
+        });
 });
